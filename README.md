@@ -109,3 +109,25 @@ curl -X POST http://127.0.0.1:8000/predict \
   preprocessor) is essential and part of the saved serving pipeline.
 - Metrics are macro-averaged across the three classes; ROC-AUC is one-vs-rest.
 - Generated artifacts (`artifacts/`, `logs/`, `mlruns/`) are gitignored.
+
+## Use cases
+
+This is a **reusable MLOps template for any multiclass classification problem**
+— the vertebral-column diagnosis is the worked example. The multi-file ingestion
++ label normalization, schema validation, label-encoding, scaled KNN, DVC/MLflow
+tracking, FastAPI serving (with class-name decoding) and CI all carry over; you
+swap the data and the `schema.yaml` contract (including the valid class list and
+label-alias map).
+
+| Domain | Swap in | Classify into |
+|--------|---------|---------------|
+| **Orthopedics** *(shipped example)* | biomechanics measurements | Normal / disk hernia / spondylolisthesis |
+| **Diagnostics** | lab panels, vitals | disease subtype / severity grade |
+| **Imaging features** | extracted radiomics | tissue / lesion category |
+| **Triage** | intake features | urgency level |
+| **Agronomy / industrial** | sensor readings | defect / crop / fault class |
+| **NLP (tabularized)** | document features | topic / intent category |
+
+To retarget: replace the per-class raw files, update `schema.yaml`
+(`target_classes`, `label_aliases`, numeric columns), tune the KNN params, and
+run `dvc repro`. The label encoder, model and `/predict` decoding regenerate.
