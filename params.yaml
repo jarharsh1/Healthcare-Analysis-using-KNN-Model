@@ -1,0 +1,17 @@
+# Experiment parameters. Tweak and re-run `dvc repro` to track experiments.
+
+data_transformation:
+  test_size: 0.2
+  random_state: 42
+
+model_trainer:
+  # KNN (honouring the original model). Feature scaling in the preprocessor is
+  # essential here since KNN is distance-based.
+  n_neighbors: 15
+  weights: distance
+  metric: minkowski
+  p: 2
+
+model_evaluation:
+  # Multiclass metrics are macro-averaged across the 3 classes.
+  average: macro

@@ -1,0 +1,52 @@
+name: CI/CD
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    name: Lint, train & test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Lint (ruff)
+        run: ruff check src app tests
+
+      - name: Run full training pipeline
+        run: python main.py
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Upload model + metrics artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-artifacts
+          path: |
+            artifacts/model_trainer/model.joblib
+            artifacts/model_evaluation/metrics.json
+          if-no-files-found: error
+
+  docker:
+    name: Build Docker image
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t vertebral-column:ci .

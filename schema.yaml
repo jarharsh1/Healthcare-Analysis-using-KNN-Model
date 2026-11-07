@@ -1,0 +1,39 @@
+# Data contract for the combined vertebral-column dataset (3 class files
+# stacked row-wise). All six features are continuous biomechanics measurements.
+
+target_column: Class
+
+# Valid target classes (one per source file).
+target_classes:
+  - Normal
+  - Type_H
+  - Type_S
+
+# The raw files contain a few dirty label variants (typos / wrong case).
+# Ingestion normalises these to the canonical classes above before validation.
+# Matching is done on the lowercased, stripped label.
+label_aliases:
+  normal: Normal
+  nrmal: Normal
+  type_h: Type_H
+  type_s: Type_S
+  tp_s: Type_S
+
+columns:
+  P_incidence: float64
+  P_tilt: float64
+  L_angle: float64
+  S_slope: float64
+  P_radius: float64
+  S_Degree: float64
+  Class: object
+
+numeric_columns:
+  - P_incidence
+  - P_tilt
+  - L_angle
+  - S_slope
+  - P_radius
+  - S_Degree
+
+categorical_columns: []
