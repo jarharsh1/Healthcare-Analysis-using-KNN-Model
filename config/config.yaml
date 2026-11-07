@@ -1,0 +1,37 @@
+artifacts_root: artifacts
+
+data_ingestion:
+  root_dir: artifacts/data_ingestion
+  # The dataset ships as one CSV per class; ingestion stacks them row-wise.
+  source_files:
+    - data/raw/Part1 - Normal.csv
+    - data/raw/Part1 - Type_H.csv
+    - data/raw/Part1 - Type_S.csv
+  local_data_file: artifacts/data_ingestion/vertebral.csv
+
+data_validation:
+  root_dir: artifacts/data_validation
+  data_file: artifacts/data_ingestion/vertebral.csv
+  status_file: artifacts/data_validation/status.json
+
+data_transformation:
+  root_dir: artifacts/data_transformation
+  data_file: artifacts/data_ingestion/vertebral.csv
+  preprocessor_file: artifacts/data_transformation/preprocessor.joblib
+  label_encoder_file: artifacts/data_transformation/label_encoder.joblib
+  train_file: artifacts/data_transformation/train.csv
+  test_file: artifacts/data_transformation/test.csv
+
+model_trainer:
+  root_dir: artifacts/model_trainer
+  train_file: artifacts/data_transformation/train.csv
+  preprocessor_file: artifacts/data_transformation/preprocessor.joblib
+  model_file: artifacts/model_trainer/model.joblib
+
+model_evaluation:
+  root_dir: artifacts/model_evaluation
+  test_file: artifacts/data_transformation/test.csv
+  model_file: artifacts/model_trainer/model.joblib
+  label_encoder_file: artifacts/data_transformation/label_encoder.joblib
+  metrics_file: artifacts/model_evaluation/metrics.json
+  mlflow_uri: ""
