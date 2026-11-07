@@ -9,6 +9,9 @@ stages:
       - "data/raw/Part1 - Normal.csv"
       - "data/raw/Part1 - Type_H.csv"
       - "data/raw/Part1 - Type_S.csv"
+      # Ingestion reads label_aliases from the schema to normalise dirty labels,
+      # so a schema change must regenerate the combined CSV.
+      - schema.yaml
     outs:
       - artifacts/data_ingestion/vertebral.csv
 
