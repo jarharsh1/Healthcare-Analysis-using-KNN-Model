@@ -44,6 +44,13 @@ class DataTransformation:
             df = df.dropna(subset=[target])
 
         # Encode the string classes to integers; persist the encoder for decoding.
+        # NOTE: this fits on the full target BEFORE the split, which is leakage-
+        # free here: LabelEncoder only maps class *names* to sorted integer codes
+        # (a deterministic relabeling), learning nothing from the feature
+        # distribution or the row split. It does not peek at test *features*. The
+        # scaler/imputer (which do learn from data) are fit on the train split
+        # only, below. Fitting the encoder on train instead would risk an unseen
+        # test label crashing inverse_transform for no correctness gain.
         label_encoder = LabelEncoder()
         df[target] = label_encoder.fit_transform(df[target].astype(str))
         save_object(self.config.label_encoder_file, label_encoder)
