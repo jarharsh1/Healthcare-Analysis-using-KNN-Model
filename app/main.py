@@ -59,12 +59,17 @@ def train() -> dict:
     global _pipeline
     try:
         from main import main as run_pipeline
-        from vertebral.pipeline.prediction import _load_label_encoder, _load_model
+        from vertebral.pipeline.prediction import (
+            _feature_columns,
+            _load_label_encoder,
+            _load_model,
+        )
 
         run_pipeline()
         # Drop caches so the next request uses the freshly trained artifacts.
         _load_model.cache_clear()
         _load_label_encoder.cache_clear()
+        _feature_columns.cache_clear()
         _pipeline = None
         return {"status": "retrained"}
     except Exception as exc:
