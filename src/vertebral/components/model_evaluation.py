@@ -49,6 +49,8 @@ class ModelEvaluation:
         }
 
         # Multiclass ROC-AUC (one-vs-rest) when probabilities are available.
+        # Always record the key: null means "not computable" (e.g. a class is
+        # absent from the test split), distinct from the key being missing.
         try:
             proba = model.predict_proba(X)
             metrics["roc_auc_ovr"] = float(
@@ -56,14 +58,15 @@ class ModelEvaluation:
             )
         except Exception as exc:  # pragma: no cover - metric best-effort
             logger.warning("Could not compute ROC-AUC: %s", exc)
+            metrics["roc_auc_ovr"] = None
 
         save_json(self.config.metrics_file, metrics)
         logger.info("Evaluation metrics: %s", metrics)
 
-        self._log_to_mlflow(metrics)
+        self._log_to_mlflow(metrics, model)
         return metrics
 
-    def _log_to_mlflow(self, metrics: dict) -> None:
+    def _log_to_mlflow(self, metrics: dict, model) -> None:
         if not _MLFLOW_AVAILABLE:
             logger.warning("MLflow not installed; skipping experiment logging.")
             return
@@ -76,9 +79,9 @@ class ModelEvaluation:
                 if isinstance(params, dict):
                     for k, v in params.items():
                         mlflow.log_param(f"{section}.{k}", v)
-            mlflow.log_metrics(metrics)
+            # MLflow metrics must be numeric; drop any None (e.g. undefined AUC).
+            mlflow.log_metrics({k: v for k, v in metrics.items() if v is not None})
             try:
-                model = load_object(self.config.model_file)
                 mlflow.sklearn.log_model(model, name="model")
             except Exception as exc:  # pragma: no cover - logging best-effort
                 logger.warning("Could not log model to MLflow: %s", exc)
